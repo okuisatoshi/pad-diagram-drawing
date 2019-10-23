@@ -54,7 +54,9 @@ end</div>
         const w = text.getAbsoluteWidth() + 12 + 4;
         stage.rect(x, y, w, h);
         stage.rect(x, y, 4, h);
-        stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
+        stage.path()
+                .moveTo(x+w, y)
+                .lineTo(x+w+s, y);
         run(word('do'));
         x += w + s;
         run(draw_seq);
@@ -76,7 +78,9 @@ end</div>
                 .lineTo(x, y+h)
                 .lineTo(x, y)
                 .close();
-        stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
+        stage.path()
+                .moveTo(x+w, y)
+                .lineTo(x+w+s, y);
         run(word('then'));
         const y0 = y;
         x += w + s;
@@ -85,7 +89,10 @@ end</div>
         const y1 = y;
         run(draw_seq);
         x -= w + s;
-        stage.path().moveTo(x+w, y0+h).lineTo(x+w, y1).lineTo(x+w+s, y1);
+        stage.path()
+                .moveTo(x+w, y0+h)
+                .lineTo(x+w, y1)
+                .lineTo(x+w+s, y1);
         run(word('end'));
         return y;
     });
@@ -94,10 +101,10 @@ end</div>
 
     const draw_seq = optional(parser_do(run => {
         var y0 = y;
-        var r = run(draw_sent);
+        var run(draw_sent);
         run(moreThan0(parser_do(run => {
             var y1 = y;
-            r = run(draw_sent);
+            run(draw_sent);
             stage.path()
                     .moveTo(x,y0)
                     .lineTo(x,y1);
