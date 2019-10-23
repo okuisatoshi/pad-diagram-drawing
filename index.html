@@ -8,7 +8,8 @@
     <script src="./toyparsing.js"></script>
 </head>
 <body>
-    <div id="code" style="width: 480px; height: 320px;">'A'
+<div style="display:table; width:100%;;">
+<div id="code" style="display:table-cell; width:50%;">'A'
 while 'B' do
     'C'
     while 'D' do
@@ -23,108 +24,108 @@ if 'H' then
 else
     'K'
 end</div>
-    <div id="stage" style="width: 600px; height: 1024px;"></div>
-    <script>
-        const h = 30;
-        const s = 25;
-		var stage = acgraph.create('stage');
-        var x = 50;
-        var y = 50;
-        var editor = ace.edit("code");
-        
-        editor.setTheme("ace/theme/monokai");
-        editor.setFontSize(12);
-        // editor.getSession.setTabSize(4);
-        editor.setKeyboardHandler("ace/keyboard/vim");   
-        // editor.setKeyboardHandler("ace/keyboard/emacs");   
-        const draw_block = parser_do(run => {
-            const label = run(pattern("'[^']+'")).slice(1,-1);
-            const text = stage.text(x+6, y+6, label).fontSize("12pt");
-            const w = text.getAbsoluteWidth() + 12;
-            stage.rect(x, y, w, h);
-            y += h + s;
-            return y;
-        });
+<div id="stage" style="display:table-cell; width:50%; height:1024pt; background:skyblue"></div>
+</div>
+<script>
+    const h = 28;
+    const s = 14;
+    var stage = acgraph.create('stage');
+    var x = 32;
+    var y = 32;
+    var editor = ace.edit("code");
+    
+    editor.setTheme("ace/theme/monokai");
+    editor.setFontSize(12);
+    editor.setKeyboardHandler("ace/keyboard/vim");   
+    // editor.setKeyboardHandler("ace/keyboard/emacs");   
+    const draw_block = parser_do(run => {
+        const label = run(pattern("'[^']+'")).slice(1,-1);
+        const text = stage.text(x+6, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12;
+        stage.rect(x, y, w, h);
+        y += h + s;
+        return y;
+    });
 
-        const draw_loop = parser_do(run => {
-            run(word('while'));
-            const label = run(pattern("'[^']+'")).slice(1,-1);
-            const text = stage.text(x+10, y+6, label).fontSize("12pt");
-            const w = text.getAbsoluteWidth() + 12 + 4;
-            stage.rect(x, y, w, h);
-            stage.rect(x, y, 4, h);
-            stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
-            run(word('do'));
-            x += w + s;
-            run(draw_seq);
-            x -= w + s;
-            run(word('end'));
-            return y;
-        });
+    const draw_loop = parser_do(run => {
+        run(word('while'));
+        const label = run(pattern("'[^']+'")).slice(1,-1);
+        const text = stage.text(x+10, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12 + 4;
+        stage.rect(x, y, w, h);
+        stage.rect(x, y, 4, h);
+        stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
+        run(word('do'));
+        x += w + s;
+        run(draw_seq);
+        x -= w + s;
+        run(word('end'));
+        return y;
+    });
 
-        const draw_if = parser_do(run => {
-            run(word('if'));
-            const label = run(pattern("'[^']+'")).slice(1,-1); 
-            const text = stage.text(x+5, y+6, label).fontSize("12pt");
-            const w = text.getAbsoluteWidth() + 12 + 12;
+    const draw_if = parser_do(run => {
+        run(word('if'));
+        const label = run(pattern("'[^']+'")).slice(1,-1); 
+        const text = stage.text(x+5, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12 + 12;
+        stage.path()
+                .moveTo(x, y)
+                .lineTo(x+w, y)
+                .lineTo(x+w-12, y+h/2)
+                .lineTo(x+w, y+h)
+                .lineTo(x, y+h)
+                .lineTo(x, y)
+                .close();
+        stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
+        run(word('then'));
+        const y0 = y;
+        x += w + s;
+        run(draw_seq);
+        run(word('else'));
+        const y1 = y;
+        run(draw_seq);
+        x -= w + s;
+        stage.path().moveTo(x+w, y0+h).lineTo(x+w, y1).lineTo(x+w+s, y1);
+        run(word('end'));
+        return y;
+    });
+
+    const draw_sent = parser_do(run => {
+        var r;
+        r = run(draw_loop, {nullable:true});
+        if (typeof r !== 'undefined') return r;
+        r = run(draw_if, {nullable:true});
+        if (typeof r !== 'undefined') return r;
+        return run(draw_block);
+    });
+
+    const draw_seq = parser_do(run => {
+        var y0 = y;
+        var r = run(draw_sent, {nullable:true});
+        if (typeof r === 'undefined') return y;
+        while (true) {
+            var y1 = y;
+            r = run(draw_sent, {nullable:true});
+            if (typeof r === 'undefined') break;
             stage.path()
-                 .moveTo(x, y)
-                 .lineTo(x+w, y)
-                 .lineTo(x+w-12, y+h/2)
-                 .lineTo(x+w, y+h)
-                 .lineTo(x, y+h)
-                 .lineTo(x, y)
-                 .close();
-            stage.path().moveTo(x+w, y).lineTo(x+w+s, y);
-            run(word('then'));
-            const y0 = y;
-            x += w + s;
-            run(draw_seq);
-            run(word('else'));
-            const y1 = y;
-            run(draw_seq);
-            x -= w + s;
-            stage.path().moveTo(x+w, y0+h).lineTo(x+w, y1).lineTo(x+w+s, y1);
-            run(word('end'));
-            return y;
-        });
+                    .moveTo(x,y0)
+                    .lineTo(x,y1);
+            y0 = y1;
+        }
+    });
 
-        const draw_sent = parser_do(run => {
-            var r;
-            r = run(draw_loop, {nullable:true});
-            if (typeof r !== 'undefined') return r;
-            r = run(draw_if, {nullable:true});
-            if (typeof r !== 'undefined') return r;
-            return run(draw_block);
-        });
-
-        const draw_seq = parser_do(run => {
-            var y0 = y;
-            var r = run(draw_sent, {nullable:true});
-            if (typeof r === 'undefined') return y;
-            while (true) {
-                var y1 = y;
-                r = run(draw_sent, {nullable:true});
-                if (typeof r === 'undefined') break;
-                stage.path()
-                     .moveTo(x,y0)
-                     .lineTo(x,y1);
-                y0 = y1;
-            }
-        });
-
-        const draw_pad = function(code) {
-            x = y = 50;
-            if (stage) stage.remove();
-		    stage = acgraph.create('stage');
-            draw_seq(code);
-        };
-        
-        $("#code").on("keydown keyup keypress change", function() {
-            draw_pad(editor.getValue());
-        });
-        
+    const draw_pad = function(code) {
+        x = y = 32;
+        if (stage) stage.remove();
+        stage = acgraph.create('stage');
+        draw_seq(code);
+    };
+    
+    $("#code").on("keydown keyup keypress change", function() {
         draw_pad(editor.getValue());
-	</script>
+    });
+    
+    draw_pad(editor.getValue());
+</script>
 </body>
 </html>
