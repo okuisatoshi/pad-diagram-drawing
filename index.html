@@ -101,7 +101,7 @@ end</div>
 
     const draw_seq = optional(parser_do(run => {
         var y0 = y;
-        var run(draw_sent);
+        run(draw_sent);
         run(moreThan0(parser_do(run => {
             var y1 = y;
             run(draw_sent);
