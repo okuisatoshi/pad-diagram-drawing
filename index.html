@@ -90,29 +90,21 @@ end</div>
         return y;
     });
 
-    const draw_sent = parser_do(run => {
-        var r;
-        r = run(draw_loop, {nullable:true});
-        if (typeof r !== 'undefined') return r;
-        r = run(draw_if, {nullable:true});
-        if (typeof r !== 'undefined') return r;
-        return run(draw_block);
-    });
+    const draw_sent = oneOf(draw_loop, draw_if, draw_block);
 
-    const draw_seq = parser_do(run => {
+    const draw_seq = optional(parser_do(run => {
         var y0 = y;
-        var r = run(draw_sent, {nullable:true});
-        if (typeof r === 'undefined') return y;
-        while (true) {
+        var r = run(draw_sent);
+        run(moreThan0(parser_do(run => {
             var y1 = y;
-            r = run(draw_sent, {nullable:true});
-            if (typeof r === 'undefined') break;
+            r = run(draw_sent);
             stage.path()
                     .moveTo(x,y0)
                     .lineTo(x,y1);
             y0 = y1;
-        }
-    });
+        })));
+        return y;
+    }));
 
     const draw_pad = function(code) {
         x = y = 32;
