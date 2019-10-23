@@ -33,11 +33,11 @@ end</div>
     var x = 32;
     var y = 32;
     var editor = ace.edit("code");
-    
+
     editor.setTheme("ace/theme/monokai");
     editor.setFontSize(12);
-    editor.setKeyboardHandler("ace/keyboard/vim");   
-    // editor.setKeyboardHandler("ace/keyboard/emacs");   
+    editor.setKeyboardHandler("ace/keyboard/vim");
+    // editor.setKeyboardHandler("ace/keyboard/emacs");
     const draw_block = parser_do(run => {
         const label = run(pattern("'[^']+'")).slice(1,-1);
         const text = stage.text(x+6, y+6, label).fontSize("12pt");
@@ -65,7 +65,7 @@ end</div>
 
     const draw_if = parser_do(run => {
         run(word('if'));
-        const label = run(pattern("'[^']+'")).slice(1,-1); 
+        const label = run(pattern("'[^']+'")).slice(1,-1);
         const text = stage.text(x+5, y+6, label).fontSize("12pt");
         const w = text.getAbsoluteWidth() + 12 + 12;
         stage.path()
@@ -112,11 +112,11 @@ end</div>
         stage = acgraph.create('stage');
         draw_seq(code);
     };
-    
+
     $("#code").on("keydown keyup keypress change", function() {
         draw_pad(editor.getValue());
     });
-    
+
     draw_pad(editor.getValue());
 </script>
 </body>
