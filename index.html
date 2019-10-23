@@ -38,6 +38,7 @@ end</div>
     editor.setFontSize(12);
     editor.setKeyboardHandler("ace/keyboard/vim");
     // editor.setKeyboardHandler("ace/keyboard/emacs");
+
     const draw_block = parser_do(run => {
         const label = run(pattern("'[^']+'")).slice(1,-1);
         const text = stage.text(x+6, y+6, label).fontSize("12pt");
@@ -85,14 +86,18 @@ end</div>
         const y0 = y;
         x += w + s;
         run(draw_seq);
-        run(word('else'));
-        const y1 = y;
-        run(draw_seq);
         x -= w + s;
-        stage.path()
-                .moveTo(x+w, y0+h)
-                .lineTo(x+w, y1)
-                .lineTo(x+w+s, y1);
+        run(optional(parser_do(run => {
+            run(word('else'));
+            const y1 = y;
+            x += w + s;
+            run(draw_seq);
+            x -= w + s;
+            stage.path()
+                    .moveTo(x+w, y0+h)
+                    .lineTo(x+w, y1)
+                    .lineTo(x+w+s, y1);
+        })));
         run(word('end'));
         return y;
     });
