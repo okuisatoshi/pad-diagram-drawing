@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.7.0/js/graphics.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js"></script>
+    <script src="./toyparsing.js"></script>
+</head>
+<body>
+<div style="display:table; width:100%;;">
+<div id="code" style="display:table-cell; width:50%;">
+int main()
+{
+    int n; int i;
+    n = 100000;
+    i = 2;
+    while (i < n) {
+        int j; int c; int p;
+        j = 2;
+        p = 1;
+        c = 4 <= i;
+        while (c) {
+            p = i % j;
+            j = j + 1;
+            if (p) c = j * j <= i; else c = 0;
+        }
+        if (p) print("%d\n", i);
+        i = i + 1;
+    }
+}
+</div>
+<div id="stage" style="display:table-cell; width:50%; height:1024pt; background:skyblue"></div>
+</div>
+<script>
+    const h = 28;
+    const s = 14;
+    var stage = acgraph.create('stage');
+    var x = 32;
+    var y = 32;
+    var editor = ace.edit("code");
+
+    editor.setTheme("ace/theme/monokai");
+    editor.setFontSize(12);
+    editor.setKeyboardHandler("ace/keyboard/vim");
+    // editor.setKeyboardHandler("ace/keyboard/emacs");
+
+    const draw_block = parser_do(run => {
+        // 注意:とりあえず簡易に// `}`で始まらず最初に`;`が出現するまでの
+        // 文字列を式文あるいは宣言としてパースしている
+        const label = run(pattern("[^}][^;]*;"));
+        const text = stage.text(x+6, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12;
+        stage.rect(x, y, w, h);
+        y += h + s;
+        return y;
+    });
+
+    const draw_loop = parser_do(run => {
+        run(word('while'));
+        run(word('('));
+        // 注意:簡易に最初に)が出現するまでの文字列を式としてパースしているので
+        // 式中に')'は使用できない
+        const label = run(pattern("[^)]+"))
+        run(word(')'));
+        const text = stage.text(x+10, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12 + 4;
+        stage.rect(x, y, w, h);
+        stage.rect(x, y, 4, h);
+        stage.path()
+                .moveTo(x+w, y)
+                .lineTo(x+w+s, y);
+        x += w + s;
+        run(draw_sent);
+        x -= w + s;
+        return y;
+    });
+
+    const draw_if = parser_do(run => {
+        run(word('if'));
+        run(word('('));
+        // 注意:簡易に最初に)が出現するまでの文字列を式としてパースしているので
+        // 式中に')'は使用できない
+        const label = run(pattern("[^)]+"))
+        run(word(')'));
+        const text = stage.text(x+5, y+6, label).fontSize("12pt");
+        const w = text.getAbsoluteWidth() + 12 + 12;
+        stage.path()
+                .moveTo(x, y)
+                .lineTo(x+w, y)
+                .lineTo(x+w-12, y+h/2)
+                .lineTo(x+w, y+h)
+                .lineTo(x, y+h)
+                .lineTo(x, y)
+                .close();
+        stage.path()
+                .moveTo(x+w, y)
+                .lineTo(x+w+s, y);
+        const y0 = y;
+        x += w + s;
+        run(draw_sent);
+        x -= w + s;
+        run(optional(parser_do(run => {
+            run(word('else'));
+            const y1 = y;
+            x += w + s;
+            run(draw_sent);
+            x -= w + s;
+            stage.path()
+                    .moveTo(x+w, y0+h)
+                    .lineTo(x+w, y1)
+                    .lineTo(x+w+s, y1);
+        })));
+        return y;
+    });
+
+    const draw_seq = parser_do(run => {
+        var y0 = y;
+        run(word('{'));
+        run(draw_sent);
+        run(moreThan0(parser_do(run => {
+            var y1 = y;
+            run(draw_sent);
+            stage.path()
+                    .moveTo(x,y0)
+                    .lineTo(x,y1);
+            y0 = y1;
+        })));
+        run(word('}'));
+        return y;
+    });
+
+    const draw_sent = oneOf(draw_loop, draw_if, draw_seq, draw_block);
+
+    const draw_program = parser_do(run => {
+        run(word('int'));
+        run(word('main'));
+        run(word('('));
+        run(word(')'));
+        run(draw_seq);
+    });
+
+    const draw_pad = function(code) {
+        x = y = 32;
+        if (stage) stage.remove();
+        stage = acgraph.create('stage');
+        draw_program(code);
+    };
+
+    $("#code").on("keydown keyup keypress change", function() {
+        draw_pad(editor.getValue());
+    });
+
+    draw_pad(editor.getValue());
+</script>
+</body>
+</html>
