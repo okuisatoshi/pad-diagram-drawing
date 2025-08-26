@@ -11,15 +11,16 @@
 <div style="display:table; width:100%;;">
 <div id="code" style="display:table-cell; width:50%;">int main()
 {
-    int x;
-    0;
-    while (0) 0;
-    while (0) { 0; while (0) 0; }
-    int y;
-    if (0) 0; else 0;
-    if (0) 0;
-    if (0) { 0; 0; 0; } else { 0; 0; }
-    if (0) if (0) 0; else 0;
+    print(2);
+    int n; int i;
+    n = 100000;
+    i = 3;
+    while (i < n) {
+        int j; j = 2;
+        while ((i % j) && (j * j <= i)) j = j + 1;
+        if (j * j > i) print(i);
+        i = i + 2;
+    }
 }
 </div>
 <div id="stage" style="display:table-cell; width:50%; height:1024pt; background:skyblue"></div>
@@ -37,19 +38,29 @@
     editor.setKeyboardHandler("ace/keyboard/vim");
     // editor.setKeyboardHandler("ace/keyboard/emacs");
 
+    const id = pattern('[_a-zA-Z][_a-zA-Z0-9]*');
+
     const draw_decl = parser_do(run => {
         run(word('int'));
-        const id = run(pattern('[_a-zA-Z][_a-zA-Z0-9]*'));
+        const v = run(id);
         run(word(';'));
-        const text = stage.text(x + 6, y + 6, 'int ' + id + ' ;').fontSize("12pt");
+        const text = stage.text(x + 6, y + 6, 'int ' + v + ' ;').fontSize("12pt");
         const w = text.getAbsoluteWidth() + 12;
         stage.rect(x, y, w, h);
         y += h + s;
         return y;
     });
 
-    // とりあえず式は0のみ
-    const expr = word("0");
+    const expr = parser_do(run => run(oneOf(seq(id, word('='), expr).fmap(a => a.join('')), lor)));
+    const num = pattern('[0-9]+');
+    const primary = oneOf(num, id, seq(word('('), expr, word(')')).fmap(a => a.join('')));
+    const suffix = oneOf(seq(primary, word('('), expr, word(')')).fmap(a => a.join('')), primary);
+    const term = sepBy(suffix, pattern('[*/%]')).fmap(a => a.join(''));
+    const additive = sepBy(term, pattern('[-+]')).fmap(a => a.join(''));
+    const relational = sepBy(additive, oneOf(word('<='), word('>='), word('<'), word('>'))).fmap(a => a.join(''));
+    const equational = sepBy(relational, oneOf(word('!='), word('=='))).fmap(a => a.join(''));
+    const land = sepBy(equational, word('&&')).fmap(a => a.join(''));
+    const lor = sepBy(land, word('||')).fmap(a => a.join(''));
 
     const draw_esent = parser_do(run => {
         const e = run(expr);
