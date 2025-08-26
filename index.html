@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdn.anychart.com/releases/8.7.0/js/graphics.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js"></script>
     <script src="./toyparsing.js"></script>
@@ -125,10 +124,9 @@ end</div>
         draw_seq(code);
     };
 
-    $("#code").on("keydown keyup keypress change", function() {
-        draw_pad(editor.getValue());
-    });
-
+    for (e of ["keydown", "keyup", "keypress", "change"]) {
+        document.getElementById('code').addEventListener(e, () => draw_pad(editor.getValue()));
+    }
     draw_pad(editor.getValue());
 </script>
 </body>
