@@ -136,17 +136,3 @@ const moreThan1 = p => cat(p,moreThan0(p));
 const sepBy = (p,sep) => cat(p,moreThan0(cat(sep,p)));
 
 
-exports.ParserFailure = ParserFailure;
-exports.parser_do = parser_do;
-exports.get = get;
-exports.put = put;
-exports.pattern = exports.pat = pattern;
-exports.word = exports.w = word;
-exports.fail = fail;
-exports.empty = empty;
-exports.seq = seq;
-exports.oneOf = exports.one_of = oneOf;
-exports.optional = exports.opt = optional;
-exports.moreThan0 = exports.for_at_least0 = moreThan0;
-exports.moreThan1 = exports.for_at_least1 = moreThan1;
-exports.sepBy = exports.sep_by = sepBy;
