@@ -28,10 +28,10 @@ end</div>
 <script>
     const h = 28;
     const s = 14;
-    var stage = acgraph.create('stage');
-    var x = 32;
-    var y = 32;
-    var editor = ace.edit("code");
+    let stage = acgraph.create('stage');
+    let x = 32;
+    let y = 32;
+    let editor = ace.edit("code");
 
     editor.setTheme("ace/theme/monokai");
     editor.setFontSize(12);
@@ -104,10 +104,10 @@ end</div>
     const draw_sent = oneOf(draw_loop, draw_if, draw_block);
 
     const draw_seq = optional(parser_do(run => {
-        var y0 = y;
+        let y0 = y;
         run(draw_sent);
         run(moreThan0(parser_do(run => {
-            var y1 = y;
+            let y1 = y;
             run(draw_sent);
             stage.path()
                     .moveTo(x,y0)
