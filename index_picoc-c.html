@@ -51,16 +51,16 @@
         return y;
     });
 
-    const expr = parser_do(run => run(oneOf(seq(id, word('='), expr).fmap(a => a.join('')), lor)));
-    const num = pattern('[0-9]+');
-    const primary = oneOf(num, id, seq(word('('), expr, word(')')).fmap(a => a.join('')));
-    const suffix = oneOf(seq(primary, word('('), expr, word(')')).fmap(a => a.join('')), primary);
-    const term = sepBy(suffix, pattern('[*/%]')).fmap(a => a.join(''));
-    const additive = sepBy(term, pattern('[-+]')).fmap(a => a.join(''));
+    const expr       = parser_do(run => run(oneOf(seq(id, word('='), expr).fmap(a => a.join('')), lor)));
+    const num        = pattern('[0-9]+');
+    const primary    = oneOf(num, id, seq(word('('), expr, word(')')).fmap(a => a.join('')));
+    const suffix     = oneOf(seq(primary, word('('), expr, word(')')).fmap(a => a.join('')), primary);
+    const term       = sepBy(suffix, pattern('[*/%]')).fmap(a => a.join(''));
+    const additive   = sepBy(term, pattern('[-+]')).fmap(a => a.join(''));
     const relational = sepBy(additive, oneOf(word('<='), word('>='), word('<'), word('>'))).fmap(a => a.join(''));
     const equational = sepBy(relational, oneOf(word('!='), word('=='))).fmap(a => a.join(''));
-    const land = sepBy(equational, word('&&')).fmap(a => a.join(''));
-    const lor = sepBy(land, word('||')).fmap(a => a.join(''));
+    const land       = sepBy(equational, word('&&')).fmap(a => a.join(''));
+    const lor        = sepBy(land, word('||')).fmap(a => a.join(''));
 
     const draw_esent = parser_do(run => {
         const e = run(expr);
@@ -124,9 +124,9 @@
             run(draw_sent);
             x -= w + s;
             stage.path()
-                    .moveTo(x+w, y0+2*h)
-                    .lineTo(x+w, y1)
-                    .lineTo(x+w+s, y1);
+                    .moveTo(x + w, y0 + 2 * h)
+                    .lineTo(x + w, y1)
+                    .lineTo(x + w + s, y1);
         })));
         // else部が空文のケースへの対応
         if (y < y0 + 2 * h + s) y = y0 + 2 * h + s;
@@ -142,8 +142,8 @@
                 var y1 = y;
                 run(oneOf(draw_decl, draw_sent));
                 stage.path()
-                        .moveTo(x,y0)
-                        .lineTo(x,y1);
+                        .moveTo(x, y0)
+                        .lineTo(x, y1);
                 y0 = y1;
             })));
         })));
